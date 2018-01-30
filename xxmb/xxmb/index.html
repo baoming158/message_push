@@ -1,0 +1,1171 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        
+        
+        <link rel="shortcut icon" href="../../img/favicon.ico">
+        <title>消息模板 - 消息推送平台</title>
+        <link href="../../css/bootstrap-custom.min.css" rel="stylesheet">
+        <link href="../../css/font-awesome-4.5.0.css" rel="stylesheet">
+        <link href="../../css/base.css" rel="stylesheet">
+        <link rel="stylesheet" href="../../css/highlight.css">
+        <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!--[if lt IE 9]>
+            <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+            <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+        <![endif]-->
+
+        <script src="../../js/jquery-1.10.2.min.js"></script>
+        <script src="../../js/bootstrap-3.0.3.min.js"></script>
+        <script src="../../js/highlight.pack.js"></script> 
+    </head>
+
+    <body>
+
+        <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+    <div class="container">
+
+        <!-- Collapsed navigation -->
+        <div class="navbar-header">
+            <!-- Expander button -->
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="../../jgsj/">消息推送平台</a>
+        </div>
+
+        <!-- Expanded navigation -->
+        <div class="navbar-collapse collapse">
+                <!-- Main navigation -->
+                <ul class="nav navbar-nav">
+                    <li >
+                        <a href="../../jgsj/">架构设计</a>
+                    </li>
+                    <li >
+                        <a href="../../xtztsj/">系统整体设计</a>
+                    </li>
+                    <li class="dropdown active">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">系统详细设计 <b class="caret"></b></a>
+                        <ul class="dropdown-menu">
+                            
+<li >
+    <a href="../../xq/">背景</a>
+</li>
+                            
+<li class="active">
+    <a href="./">消息模板</a>
+</li>
+                            
+<li >
+    <a href="../../yzyq/">验证引擎</a>
+</li>
+                            
+<li >
+    <a href="../../安全认证/aqrz/">安全认证</a>
+</li>
+                            
+<li >
+    <a href="../../db/">db设计</a>
+</li>
+                            
+<li >
+    <a href="../../log_format/">日志格式</a>
+</li>
+                            
+<li >
+    <a href="../../api/">api规范</a>
+</li>
+                        </ul>
+                    </li>
+                </ul>
+
+            <ul class="nav navbar-nav navbar-right">
+                <li>
+                    <a href="#" data-toggle="modal" data-target="#mkdocs_search_modal">
+                        <i class="fa fa-search"></i> Search
+                    </a>
+                </li>
+                    <li >
+                        <a rel="next" href="../../xq/">
+                            <i class="fa fa-arrow-left"></i> Previous
+                        </a>
+                    </li>
+                    <li >
+                        <a rel="prev" href="../../yzyq/">
+                            Next <i class="fa fa-arrow-right"></i>
+                        </a>
+                    </li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+        <div class="container">
+                <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
+    <ul class="nav bs-sidenav">
+        <li class="main active"><a href="#_1">详细设计</a></li>
+    </ul>
+</div></div>
+                <div class="col-md-9" role="main">
+
+<h3 id="_1"><span id="top">详细设计</h3>
+<blockquote>
+<p>现有的卡片类型：</p>
+</blockquote>
+<ul>
+<li>投票卡片 <a href="#vote">消息模板</a></li>
+<li>通用卡片 <a href="#general">消息模板</a></li>
+<li>竞猜答题 <a href="#quiz">消息模板</a></li>
+<li>节目导视 <a href="#column_guide">消息模板</a></li>
+<li>礼品商城卡片 <a href="#points_mall">消息模板</a></li>
+<li>预约卡片 <a href="#subscribe">消息模板</a></li>
+<li>暴风卡片 <a href="#storm">消息模板</a></li>
+<li>模块化卡片 <a href="#component">消息模板</a> 不确认是否在用，抢购卡片有关联？</li>
+<li>主动推荐卡片 此卡片很丑陋,消息格式好乱 <a href="#recommend">消息模板</a></li>
+<li>广告卡片 遗留卡片，上线后未使用，不知道为啥 <a href="#advertise">消息模板</a></li>
+<li><a href="#product">product.ftl</a></li>
+<li>
+<p>卡片类型对应ID值表格 <a href="#typeids">对应表</a></p>
+</li>
+<li>
+<p>投票卡片消息格式 <a href="#top">返回顶部</a>
+<span id = "vote"></p>
+</li>
+</ul>
+<pre><code>    &lt;#import &quot;common.ftl&quot; as global/&gt;
+    &lt;#if push_sub_type == 1&gt;
+        &lt;#assign cmd =&quot;get_options&quot;/&gt;
+    &lt;/#if&gt;
+    &lt;#if push_sub_type == 2&gt;
+        &lt;#assign cmd =&quot;get_result&quot;/&gt;
+    &lt;/#if&gt;
+    {
+        &quot;id&quot;: &quot;${card.id?c}&quot;,
+        &quot;type&quot;: 16,
+        &quot;source&quot;: &quot;backend_cards_vote&quot;,
+        &quot;subType&quot;: &quot;${push_sub_type}&quot;,
+        &quot;description&quot;: &quot;${global.now_time } push vote card&quot;,
+        &quot;timestamp&quot;: ${timeStamp?c},
+        &lt;#--  data的压缩方式 0：无压缩 1：MessagePack --&gt;   
+        &quot;compression&quot;: ${global.compression},
+        &quot;data&quot;: {
+            &quot;content&quot;: {
+                &lt;#--  卡片ID，由客户端指定 --&gt;   
+                &quot;id&quot;: &quot;vote&quot;,
+                &lt;#--  最小版本，目前默认为1 --&gt;   
+                &quot;min_version&quot;: &quot;${global.min_version}&quot;,
+                &quot;content&quot; : {
+                    &quot;url&quot;: &quot;${global.server_domain}/cards/api/votes?action=votes&amp;msg_type=1&amp;cmd=${cmd}&amp;card_id=${card.id?c}&amp;push_time=${timeStamp?c}&quot; 
+                }
+            },
+            &lt;#--  消息目标人群肖像属性--&gt;   
+            &quot;target_profile&quot;: {
+                &lt;#include &quot;product.ftl&quot;&gt; 
+                &lt;#if terminal_limit??&gt;
+                    &quot;terminal_limit&quot;:&quot;${terminal_limit?c}&quot;,
+                &lt;/#if&gt;
+                &lt;#if card.trigger_force??&gt;
+                    &lt;#if card.trigger_force == 0&gt;
+                        &quot;enforcement&quot;:&quot;false&quot;,
+                    &lt;/#if&gt;
+                    &lt;#if card.trigger_force == 1&gt;
+                        &quot;enforcement&quot;:&quot;true&quot;,
+                    &lt;/#if&gt;
+                &lt;/#if&gt;
+                &lt;#--  非热门投票推送消息时 需要tvid 推送结果不需要 --&gt;
+                &lt;#if card.hot_vote == 0 &amp;&amp; push_sub_type == 1 &amp;&amp; card.tv_id??&gt;
+                &quot;tv_id&quot;: &quot;${card.tv_id?c}&quot;,
+                &quot;column_id&quot;: &quot;${card.column_id?c}&quot;,
+                &lt;#else&gt;
+                    &lt;#if tv_list?? &amp;&amp; push_sub_type == 1&gt;
+                    &quot;tv_ids&quot;:[
+                        &lt;#list tv_list as tv&gt;
+                            &quot;${tv.tv_id?c}&quot;&lt;#if tv_has_next&gt;,&lt;/#if&gt;
+                        &lt;/#list&gt;
+                    ],
+                    &lt;/#if&gt;
+                &lt;/#if&gt;
+                &lt;#if labels_list??&gt;
+                &quot;labels&quot;:[
+                  &lt;#list labels_list as label&gt;
+                  &quot;${label.labelId?c}&quot;&lt;#if label_has_next&gt;,&lt;/#if&gt;
+                  &lt;/#list&gt;
+                ],
+                &lt;/#if&gt;
+                &lt;#--  指定投票ID（卡片ID）。--&gt;   
+                &quot;card_id&quot;: &quot;${card.id?c}&quot; 
+            }
+        }
+    }
+</code></pre>
+
+<ul>
+<li>通用卡片消息格式 <a href="#top">返回顶部</a></li>
+</ul>
+<p><span id = "general"></p>
+<pre><code>
+    &lt;#import &quot;common.ftl&quot; as global/&gt;
+    &lt;#if card.sub_type?? &amp;&amp; card.sub_type == 2&gt;
+        &lt;#assign cmd =&quot;get_general_qrcode_card&quot;/&gt;
+    &lt;#else&gt;
+        &lt;#assign cmd =&quot;get_general_card&quot;/&gt;
+    &lt;/#if&gt;
+
+    {
+        &quot;id&quot;: &quot;${card.id?c}&quot;,
+        &quot;type&quot;: 8,
+        &quot;source&quot;: &quot;backend_cards_general&quot;,
+        &quot;subType&quot;: 1,
+        &quot;description&quot;: &quot;${global.now_time } push general card&quot;,
+        &quot;timestamp&quot;: ${timeStamp?c},
+        &lt;#--  data的压缩方式 0：无压缩 1：MessagePack --&gt;   
+        &quot;compression&quot;: ${global.compression},
+        &quot;data&quot;: {
+            &quot;content&quot;: {
+                &lt;#--  卡片ID，由客户端指定 --&gt;   
+                &quot;id&quot;: &quot;general&quot;,
+                &lt;#--  最小版本，目前默认为1 --&gt;   
+                &quot;min_version&quot;: &quot;${global.min_version}&quot;,
+                &quot;content&quot; : {
+                    &quot;url&quot;: &quot;${global.server_domain}/cards/api/instants?action=instants&amp;cmd=${cmd}&amp;card_id=${card.id?c}&amp;push_time=${timeStamp?c}&quot; 
+                }
+            },
+            &lt;#--  消息目标人群肖像属性--&gt;   
+            &quot;target_profile&quot;: {
+                &lt;#include &quot;product.ftl&quot;&gt; 
+                &lt;#if terminal_limit??&gt;
+                    &quot;terminal_limit&quot;:&quot;${terminal_limit?c}&quot;,
+                &lt;/#if&gt;
+                &lt;#if card.tv_id??&gt;
+                    &quot;tv_id&quot;: &quot;${card.tv_id?c}&quot;,
+                  &quot;column_id&quot;: &quot;${card.column_id?c}&quot;,
+                &lt;#else&gt;
+                    &lt;#if tv_list??&gt;
+                    &quot;tv_ids&quot;:[
+                         &lt;#list tv_list as tv&gt;
+                         &quot;${tv.tv_id?c}&quot;&lt;#if tv_has_next&gt;,&lt;/#if&gt;
+                         &lt;/#list&gt;
+                    ],
+                &lt;/#if&gt;
+                &lt;/#if&gt;
+                &lt;#if area_list??&gt;
+                    &quot;areas&quot;:[
+                         &lt;#list area_list as area&gt;
+                         &quot;${area.area_id?c}&quot;&lt;#if area_has_next&gt;,&lt;/#if&gt;
+                         &lt;/#list&gt;
+                    ],
+                &lt;/#if&gt;
+                &lt;#if labels_list??&gt;
+                    &quot;labels&quot;:[
+                    &lt;#list labels_list as label&gt;
+                        &quot;${label.labelId?c}&quot;&lt;#if label_has_next&gt;,&lt;/#if&gt;
+                    &lt;/#list&gt;
+                ],
+                &lt;/#if&gt;
+                &lt;#if user_ids??&gt;
+                    &quot;user_ids&quot;:[
+                     &lt;#list user_ids as user_id&gt;
+                         &quot;${user_id?c}&quot;&lt;#if user_id_has_next&gt;,&lt;/#if&gt;
+                    &lt;/#list&gt;
+                    ],
+               &lt;/#if&gt;
+               &lt;#if user_groups_map??&gt;
+                    &lt;#list user_groups_map  as key&gt;
+                        &quot;user_groups&quot;:[
+                            &quot;${key.group_id?c}:${key.group_type?c}&quot;
+                            &lt;#if key_has_next&gt;,&lt;/#if&gt;
+                        ]
+                    &lt;/#list&gt;
+                &lt;/#if&gt;
+               &lt;#if card.online_delivery??&gt;
+                    &lt;#if card.online_delivery == 1&gt;
+                        &quot;online_delivery&quot;:&quot;true&quot;,
+                    &lt;#else&gt;
+                        &quot;online_delivery&quot;:&quot;false&quot;,
+                    &lt;/#if&gt;
+               &lt;/#if&gt;
+               &lt;#if card.expired_time??&gt;
+                    &quot;expired_time&quot;:&quot;${card.expired_time?string(&quot;yyyy-MM-dd HH:mm:ss&quot;) }&quot;,
+               &lt;/#if&gt;
+                &lt;#if card.trigger_force??&gt;
+                    &lt;#if card.trigger_force == 0&gt;
+                        &quot;enforcement&quot;:&quot;false&quot;
+                    &lt;/#if&gt;
+                    &lt;#if card.trigger_force == 1&gt;
+                        &quot;enforcement&quot;:&quot;true&quot;
+                    &lt;/#if&gt;
+                &lt;/#if&gt;
+            }
+        }
+    }
+</code></pre>
+
+<p></span></p>
+<ul>
+<li>预约卡片消息格式 <a href="#top">返回顶部</a></li>
+</ul>
+<p><span id="subscribe"></p>
+<pre><code>&lt;#import &quot;common.ftl&quot; as global/&gt;
+{
+    &quot;id&quot;: &quot;${card.recommend_id?c}&quot;,
+    &quot;type&quot;: 10,
+    &quot;source&quot;: &quot;backend_cards_subscribe&quot;,
+    &quot;subType&quot;: 1,
+    &quot;description&quot;: &quot;${global.now_time } push subscribe card&quot;,
+    &quot;timestamp&quot;: ${timeStamp?c},
+    &quot;compression&quot;: ${global.compression},
+    &quot;data&quot;: {
+        &quot;content&quot;: {
+            &lt;#--  卡片ID，由客户端指定 --&gt;   
+            &quot;id&quot;: &quot;subscribe&quot;,
+            &lt;#--  最小版本，目前默认为1 --&gt;   
+            &quot;min_version&quot;: &quot;${global.min_version}&quot;,
+            &quot;content&quot; : {
+                &quot;url&quot;: &quot;${global.server_domain}/cards/api/residents/?action=residents&amp;cmd=get_subscribe_card&amp;msg_type=1&amp;recommend_id=${card.recommend_id?c}&amp;push_time=${timeStamp?c}&quot; 
+            }
+        },
+        &lt;#--  消息目标人群肖像属性--&gt;   
+        &quot;target_profile&quot;: {
+            &lt;#include &quot;product.ftl&quot;&gt; 
+            &lt;#if terminal_limit??&gt;
+                &quot;terminal_limit&quot;:&quot;${terminal_limit?c}&quot;,
+            &lt;/#if&gt;
+            &lt;#if card.tv_id??&gt;
+                &quot;tv_id&quot;: &quot;${card.tv_id?c}&quot;,
+            &lt;/#if&gt;
+            &quot;card_id&quot;: &quot;${card.recommend_id?c}&quot;,
+            &lt;#if card.trigger_force??&gt;
+                &lt;#if card.trigger_force == 0&gt;
+                    &quot;enforcement&quot;:&quot;false&quot;
+                &lt;/#if&gt;
+                &lt;#if card.trigger_force == 1&gt;
+                    &quot;enforcement&quot;:&quot;true&quot;
+                &lt;/#if&gt;
+            &lt;/#if&gt;
+        }
+    }
+}
+</code></pre>
+
+<p></span></p>
+<ul>
+<li>竞猜答题消息格式 <a href="#top">返回顶部</a>
+<span id="quiz"></li>
+</ul>
+<pre><code>&lt;#import &quot;common.ftl&quot; as global/&gt;
+&lt;#if push_sub_type == 1&gt;
+    &lt;#assign cmd =&quot;get_question&quot;/&gt;
+&lt;/#if&gt;
+&lt;#if push_sub_type == 2&gt;
+    &lt;#assign cmd =&quot;get_answer&quot;/&gt;
+&lt;/#if&gt;
+
+{
+    &quot;id&quot;: &quot;${card.id?c}&quot;,
+    &lt;#--  卡片消息 竞猜答题 ：18 --&gt;   
+    &quot;type&quot;: 18,
+    &lt;#--  卡片子类型 1 消息 2 结果--&gt;   
+    &quot;source&quot;: &quot;backend_cards_quiz&quot;,
+    &quot;subType&quot;: &quot;${push_sub_type}&quot;,
+    &quot;description&quot;: &quot;${global.now_time } 推送竞猜答题&quot;,
+    &quot;timestamp&quot;: ${timeStamp?c},
+    &lt;#--  data的压缩方式 0：无压缩 1：MessagePack --&gt;   
+    &quot;compression&quot;: ${global.compression},
+    &quot;data&quot;: {
+        &quot;content&quot;: {
+            &lt;#--  卡片ID，由客户端指定 --&gt;   
+            &quot;id&quot;: &quot;quiz&quot;,
+            &lt;#--  最小版本，目前默认为1 --&gt;   
+            &quot;min_version&quot;: &quot;${global.min_version}&quot;,
+            &quot;content&quot; : {
+                    &lt;#if push_sub_type == 1&gt;
+                        &quot;url&quot;: &quot;${global.server_domain}/cards/api/quiz?action=quiz&amp;cmd=${cmd}&amp;card_id=${card.id?c}&amp;push_time=${timeStamp?c}&quot;
+                    &lt;/#if&gt;
+                    &lt;#if push_sub_type == 2&gt;
+                        &quot;url&quot;: &quot;${global.server_domain}/cards/api/quiz?action=quiz&amp;type=c&amp;cmd=${cmd}&amp;card_id=${card.id?c}&amp;push_time=${timeStamp?c}&quot;
+                    &lt;/#if&gt;
+            }
+        },
+        &lt;#--  消息目标人群肖像属性--&gt;   
+        &quot;target_profile&quot;: {
+            &lt;#include &quot;product.ftl&quot;&gt; 
+            &lt;#if terminal_limit??&gt;
+                &quot;terminal_limit&quot;:&quot;${terminal_limit?c}&quot;,
+            &lt;/#if&gt;
+            &lt;#if card.trigger_force??&gt;
+                &lt;#if card.trigger_force == 0&gt;
+                    &quot;enforcement&quot;:&quot;false&quot;,
+                &lt;/#if&gt;
+                &lt;#if card.trigger_force == 1&gt;
+                    &quot;enforcement&quot;:&quot;true&quot;,
+                &lt;/#if&gt;
+            &lt;/#if&gt;
+
+            &lt;#--  指定用户当前的电视台ID。--&gt;
+            &lt;#--推送消息是 需要tvid和columnid 推送结果时 不需要--&gt;
+            &lt;#if card.tv_id?? &amp;&amp; push_sub_type == 1&gt;
+                &quot;tv_id&quot;: &quot;${card.tv_id?c}&quot;,
+                &quot;column_id&quot;:&quot;${card.column_id?c}&quot;,
+            &lt;#else&gt;
+                &lt;#if tv_list??&gt;
+                &quot;tv_ids&quot;:[
+                    &lt;#list tv_list as tv&gt;
+                    &quot;${tv.tv_id?c}&quot;&lt;#if tv_has_next&gt;,&lt;/#if&gt;
+                    &lt;/#list&gt;
+                ],
+                &lt;/#if&gt;
+            &lt;/#if&gt;
+            &lt;#if area_list??&gt;
+                &quot;areas&quot;:[
+                     &lt;#list area_list as area&gt;
+                     &quot;${area.area_id?c}&quot;&lt;#if area_has_next&gt;,&lt;/#if&gt;
+                     &lt;/#list&gt;
+                ],
+            &lt;/#if&gt;
+            &lt;#if labels_list??&gt;
+            &quot;labels&quot;:[
+                &lt;#list labels_list as label&gt;
+                &quot;${label.labelId?c}&quot;&lt;#if label_has_next&gt;,&lt;/#if&gt;
+                &lt;/#list&gt;
+            ],
+            &lt;/#if&gt;
+            &lt;#if user_ids??&gt;
+                &quot;user_ids&quot;:[
+                    &lt;#list user_ids as user_id&gt;
+                    &quot;${user_id?c}&quot;&lt;#if user_id_has_next&gt;,&lt;/#if&gt;
+                    &lt;/#list&gt;
+                ],
+            &lt;/#if&gt;
+            &lt;#if user_groups_map??&gt;
+                &lt;#list user_groups_map  as key&gt;
+                &quot;user_groups&quot;:[
+                &quot;${key.group_id?c}:${key.group_type?c}&quot;
+                    &lt;#if key_has_next&gt;,&lt;/#if&gt;
+                ]
+                &lt;/#list&gt;
+            &lt;/#if&gt;
+
+            &lt;#--  指定投票ID（卡片ID）。--&gt;   
+            &quot;card_id&quot;: &quot;${card.id?c}&quot; 
+        }
+    }
+}
+</code></pre>
+
+<ul>
+<li>礼品商城卡片消息格式 <a href="#top">返回顶部</a>
+<span id="points_mall"></li>
+</ul>
+<pre><code>&lt;#import &quot;common.ftl&quot; as global/&gt;
+{
+    &quot;id&quot;: &quot;${card.id?c}&quot;,
+    &quot;type&quot;: 13,
+    &quot;source&quot;: &quot;backend_cards_integral_mall&quot;,
+    &quot;subType&quot;: 1,
+    &quot;description&quot;: &quot;${global.now_time } push mall card&quot;,
+    &quot;timestamp&quot;: ${timeStamp?c},
+    &lt;#--  data的压缩方式 0：无压缩 1：MessagePack --&gt;   
+    &quot;compression&quot;: ${global.compression},
+    &quot;data&quot;: {
+        &quot;content&quot;: {
+            &quot;id&quot;: &quot;points_mall&quot;,
+            &quot;min_version&quot;: &quot;${global.min_version}&quot;,
+            &quot;content&quot; : {
+                &quot;url&quot;: &quot;${global.server_domain}/cards/api/malls/?action=malls&amp;cmd=get_mall_card&amp;msg_type=1&amp;card_id=${card.id?c}&amp;push_time=${timeStamp?c}&quot; 
+            }
+        },
+        &lt;#--  消息目标人群肖像属性--&gt;   
+        &quot;target_profile&quot;: {
+            &lt;#include &quot;product.ftl&quot;&gt; 
+            &lt;#if terminal_limit??&gt;
+                &quot;terminal_limit&quot;:&quot;${terminal_limit?c}&quot;,
+            &lt;/#if&gt;
+            &lt;#if card.trigger_force??&gt;
+                &lt;#if card.trigger_force == 0&gt;
+                    &quot;enforcement&quot;:&quot;false&quot;
+                &lt;/#if&gt;
+                &lt;#if card.trigger_force == 1&gt;
+                    &quot;enforcement&quot;:&quot;true&quot;
+                &lt;/#if&gt;
+            &lt;/#if&gt;
+            &lt;#--  指定用户当前的电视台ID。--&gt;
+            &lt;#--推送消息是 需要tvid和columnid 推送结果时 不需要--&gt;
+            &lt;#if card.tv_id?? &amp;&amp; push_sub_type == 1&gt;
+                &quot;tv_id&quot;: &quot;${card.tv_id?c}&quot;,
+                &quot;column_id&quot;:&quot;${card.column_id?c}&quot;,
+            &lt;#else&gt;
+                &lt;#if tv_list??&gt;
+                &quot;tv_ids&quot;:[
+                    &lt;#list tv_list as tv&gt;
+                    &quot;${tv.tv_id?c}&quot;&lt;#if tv_has_next&gt;,&lt;/#if&gt;
+                    &lt;/#list&gt;
+                ],
+                &lt;/#if&gt;
+            &lt;/#if&gt;
+            &lt;#if area_list??&gt;
+                &quot;areas&quot;:[
+                     &lt;#list area_list as area&gt;
+                     &quot;${area.area_id?c}&quot;&lt;#if area_has_next&gt;,&lt;/#if&gt;
+                     &lt;/#list&gt;
+                ],
+            &lt;/#if&gt;
+            &lt;#if user_ids??&gt;
+                &quot;user_ids&quot;:[
+                 &lt;#list user_ids as user_id&gt;
+                     &quot;${user_id?c}&quot;&lt;#if user_id_has_next&gt;,&lt;/#if&gt;
+                &lt;/#list&gt;
+                ],
+           &lt;/#if&gt;
+           &lt;#if user_groups_map??&gt;
+                &lt;#list user_groups_map  as key&gt;
+                    &quot;user_groups&quot;:[
+                        &quot;${key.group_id?c}:${key.group_type?c}&quot;
+                        &lt;#if key_has_next&gt;,&lt;/#if&gt;
+                    ]
+                &lt;/#list&gt;
+            &lt;/#if&gt;
+            &quot;card_id&quot;: &quot;${card.id?c}&quot; 
+        }
+    }
+}
+</code></pre>
+
+<ul>
+<li>暴风卡片消息格式 <a href="#top">返回顶部</a>
+<span id ="storm"></li>
+</ul>
+<pre><code>&lt;#import &quot;common.ftl&quot; as global/&gt;
+{
+    &quot;id&quot;: &quot;${card.id?c}&quot;,
+    &quot;type&quot;: 24,
+    &quot;source&quot;: &quot;backend_cards_storm&quot;,
+    &quot;subType&quot;: 1,
+    &quot;description&quot;: &quot;${global.now_time } push storm card&quot;,
+    &quot;timestamp&quot;: ${timeStamp?c},
+    &lt;#--  data的压缩方式 0：无压缩 1：MessagePack --&gt;   
+    &quot;compression&quot;: ${global.compression},
+    &quot;data&quot;: {
+        &quot;content&quot;: {
+            &lt;#--  卡片ID，由客户端指定 --&gt;   
+            &quot;id&quot;: &quot;recommend&quot;,
+            &lt;#--  最小版本，目前默认为1 --&gt;   
+            &quot;min_version&quot;: &quot;${global.min_version}&quot;,
+            &quot;content&quot; : {
+                &quot;url&quot;: &quot;${global.server_domain}/cards/api/recommends/?action=recommends&amp;cmd=get_message&amp;card_id=${card.id?c}&amp;push_time=${timeStamp?c}&quot; 
+            }
+        },
+        &lt;#--  消息目标人群肖像属性--&gt;   
+        &quot;target_profile&quot;: {
+          &lt;#include &quot;product.ftl&quot;&gt;
+            &lt;#if terminal_limit??&gt;
+                &quot;terminal_limit&quot;:&quot;${terminal_limit?c}&quot;,
+            &lt;/#if&gt;
+            &quot;tv_id&quot;:&quot;${tv_id?c}&quot;,
+            &quot;column_id&quot;:&quot;${column_id?c}&quot;,
+            &lt;#if area_list??&gt;
+                &quot;areas&quot;:[
+                     &lt;#list area_list as area&gt;
+                     &quot;${area.area_id?c}&quot;&lt;#if area_has_next&gt;,&lt;/#if&gt;
+                     &lt;/#list&gt;
+                ],
+            &lt;/#if&gt;
+            &lt;#if user_ids??&gt;
+                &quot;user_ids&quot;:[
+                 &lt;#list user_ids as user_id&gt;
+                     &quot;${user_id?c}&quot;&lt;#if user_id_has_next&gt;,&lt;/#if&gt;
+                &lt;/#list&gt;
+                ],
+           &lt;/#if&gt;
+            &lt;#if card.trigger_force??&gt;
+                &lt;#if card.trigger_force == 0&gt;
+                    &quot;enforcement&quot;:&quot;false&quot;
+                &lt;/#if&gt;
+                &lt;#if card.trigger_force == 1&gt;
+                    &quot;enforcement&quot;:&quot;true&quot;
+                &lt;/#if&gt;
+            &lt;/#if&gt;
+        }
+    }
+}
+</code></pre>
+
+<ul>
+<li>广告卡片消息格式 <a href="#top">返回顶部</a>
+<span id="advertise"></li>
+</ul>
+<pre><code>&lt;#import &quot;common.ftl&quot; as global/&gt;
+&lt;#assign cmd =&quot;get_ad_card&quot;/&gt;
+
+{
+    &quot;id&quot;: &quot;${card.id?c}&quot;,
+    &quot;type&quot;: 27,
+    &quot;source&quot;: &quot;backend_cards_ad&quot;,
+    &quot;subType&quot;: 1,
+    &quot;description&quot;: &quot;${global.now_time } push ad card&quot;,
+    &quot;timestamp&quot;: ${timeStamp?c},
+    &lt;#--  data的压缩方式 0：无压缩 1：MessagePack --&gt;   
+    &quot;compression&quot;: ${global.compression},
+    &quot;data&quot;: {
+        &quot;content&quot;: {
+            &lt;#--  卡片ID，由客户端指定 --&gt;   
+            &quot;id&quot;: &quot;ad&quot;,
+            &lt;#--  最小版本，目前默认为1 --&gt;   
+            &quot;min_version&quot;: &quot;${global.min_version}&quot;,
+            &quot;content&quot; : {
+                &quot;url&quot;: &quot;${global.server_domain_adcard}?action=ad&amp;cmd=${cmd}&amp;card_id=${card.id?c}&amp;push_time=${timeStamp?c}&quot; 
+            }
+        },
+        &lt;#--  消息目标人群肖像属性--&gt;   
+        &quot;target_profile&quot;: {
+            &lt;#include &quot;product.ftl&quot;&gt; 
+            &lt;#if terminal_limit??&gt;
+                &quot;terminal_limit&quot;:&quot;${terminal_limit?c}&quot;,
+            &lt;/#if&gt;
+            &lt;#if card.tv_id??&gt;
+                &quot;tv_id&quot;: &quot;${card.tv_id?c}&quot;,
+              &quot;column_id&quot;: &quot;${card.column_id?c}&quot;,
+            &lt;#else&gt;
+                &lt;#if tv_list??&gt;
+                &quot;tv_ids&quot;:[
+                     &lt;#list tv_list as tv&gt;
+                     &quot;${tv.tv_id?c}&quot;&lt;#if tv_has_next&gt;,&lt;/#if&gt;
+                     &lt;/#list&gt;
+                ],
+            &lt;/#if&gt;
+            &lt;/#if&gt;
+            &lt;#if area_list??&gt;
+                &quot;areas&quot;:[
+                     &lt;#list area_list as area&gt;
+                     &quot;${area.area_id?c}&quot;&lt;#if area_has_next&gt;,&lt;/#if&gt;
+                     &lt;/#list&gt;
+                ],
+            &lt;/#if&gt;
+
+            &lt;#if user_ids??&gt;
+                &quot;user_ids&quot;:[
+                 &lt;#list user_ids as user_id&gt;
+                     &quot;${user_id?c}&quot;&lt;#if user_id_has_next&gt;,&lt;/#if&gt;
+                &lt;/#list&gt;
+                ],
+           &lt;/#if&gt;
+           &lt;#if user_groups_map??&gt;
+                &lt;#list user_groups_map  as key&gt;
+                    &quot;user_groups&quot;:[
+                        &quot;${key.group_id?c}:${key.group_type?c}&quot;
+                        &lt;#if key_has_next&gt;,&lt;/#if&gt;
+                    ]
+                &lt;/#list&gt;
+            &lt;/#if&gt;
+           &lt;#if card.online_delivery??&gt;
+                &lt;#if card.online_delivery == 1&gt;
+                    &quot;online_delivery&quot;:&quot;true&quot;,
+                &lt;#else&gt;
+                    &quot;online_delivery&quot;:&quot;false&quot;,
+                &lt;/#if&gt;
+           &lt;/#if&gt;
+           &lt;#if card.expired_time??&gt;
+                &quot;expired_time&quot;:&quot;${card.expired_time?string(&quot;yyyy-MM-dd HH:mm:ss&quot;) }&quot;,
+           &lt;/#if&gt;
+            &lt;#if card.trigger_force??&gt;
+                &lt;#if card.trigger_force == 0&gt;
+                    &quot;enforcement&quot;:&quot;false&quot;
+                &lt;/#if&gt;
+                &lt;#if card.trigger_force == 1&gt;
+                    &quot;enforcement&quot;:&quot;true&quot;
+                &lt;/#if&gt;
+            &lt;/#if&gt;
+        }
+    }
+}
+</code></pre>
+
+<ul>
+<li>product.ftl <a href="#top">返回顶部</a>
+<span id="product"></li>
+</ul>
+<pre><code>&quot;products&quot;: [
+    &lt;#if machine_map??&gt;
+        &lt;#list machine_map.keySet() as key&gt;
+            {
+                &lt;#--  产品ID --&gt;   
+                &quot;id&quot;: &quot;${key?c}&quot;,
+                &lt;#--  该产品下的目标机型，可以有多个。如果不指定，--&gt;   
+                &lt;#--  那么默认会向该产品下的所有机型推送该卡片。--&gt;   
+                &quot;models&quot;: [
+                    &lt;#if machine_map??&gt;
+                        &lt;#list machine_map.get(key) as item&gt;
+                            &lt;#if item.machine_type!= ''&gt;
+                                &quot;${item.machine_type}&quot;
+                                &lt;#if item_has_next&gt;,&lt;/#if&gt;
+                            &lt;/#if&gt;
+                        &lt;/#list&gt;
+                    &lt;/#if&gt;
+                ]
+            }
+            &lt;#if key_has_next&gt;,&lt;/#if&gt;
+        &lt;/#list&gt;
+    &lt;/#if&gt;
+],
+&lt;#if card.test_product?? &amp;&amp; card.test_product == 1&gt;
+&quot;device_ids&quot;: [
+   &lt;#if test_product_list??&gt;
+        &lt;#list test_product_list as mac&gt;
+            &quot;${mac}&quot;&lt;#if mac_has_next&gt;,&lt;/#if&gt;
+        &lt;/#list&gt;
+    &lt;/#if&gt;
+],
+&lt;/#if&gt;
+</code></pre>
+
+<ul>
+<li>节目导视 <a href="#top">返回顶部</a>
+<span id="column_guide"></li>
+</ul>
+<pre><code>&lt;#import &quot;common.ftl&quot; as global/&gt;
+{
+    &quot;id&quot;: 0,
+    &quot;type&quot;: 25,
+    &quot;source&quot;: &quot;column_guide&quot;,
+    &quot;subType&quot;: 1,
+    &quot;description&quot;: &quot;&quot;,
+    &quot;timestamp&quot;: ${timeStamp?c},
+    &lt;#--  data的压缩方式 0：无压缩 1：MessagePack --&gt;
+    &quot;compression&quot;: ${global.compression},
+    &quot;data&quot;: {
+        &quot;content&quot;: {
+        &lt;#--  卡片ID，由客户端指定 --&gt;
+            &quot;id&quot;: &quot;column_guide&quot;,
+        &lt;#--  最小版本，目前默认为1 --&gt;
+            &quot;min_version&quot;: &quot;${global.min_version}&quot;,
+            &quot;content&quot; : {
+            &quot;url&quot;: &quot;http://tvtest.kuyun.com/cards/api/interface/programguide/intelligent_recommendation&quot;
+            }
+        },
+        &lt;#--  消息目标人群肖像属性--&gt;
+        &quot;target_profile&quot;: {
+            &lt;#if tv_list??&gt;
+            &quot;tv_ids&quot;:[
+                &lt;#list tv_list as tv&gt;
+                &quot;${tv}&quot;&lt;#if tv_has_next&gt;,&lt;/#if&gt;
+                &lt;/#list&gt;
+            ],
+            &lt;/#if&gt;
+            &quot;stay_channel_time&quot; : &quot;60&quot;,
+            &quot;enforcement&quot;:&quot;false&quot;
+        }
+    }
+}
+</code></pre>
+
+<ul>
+<li>主动推荐卡片消息格式 <a href="#top">返回顶部</a>
+<span id="recommend"></li>
+</ul>
+<pre><code>&lt;#import &quot;common.ftl&quot; as global/&gt;
+{
+    &quot;id&quot;: &quot;${detail.id?c}&quot;,
+    &quot;type&quot;: 8,
+    &quot;source&quot;: &quot;schedule@general_recommend&quot;,
+    &quot;subType&quot;: 3,
+    &quot;description&quot;: &quot;&lt;#if detail.template_id==1&gt;upcoming&lt;/#if&gt;&lt;#if detail.template_id==2&gt;hot&lt;/#if&gt;&lt;#if detail.template_id==3&gt;prolist&lt;/#if&gt;&lt;#if detail.template_id==4&gt;realtime&lt;/#if&gt;&lt;#if detail.template_id==5&gt;inflow&lt;/#if&gt;&lt;#if detail.template_id==6&gt;daily&lt;/#if&gt;&lt;#if detail.template_id==7&gt;rest&lt;/#if&gt;&lt;#if detail.template_id==8&gt;lunch&lt;/#if&gt;&lt;#if detail.template_id==9&gt;supper&lt;/#if&gt;&lt;#if detail.template_id==10&gt;recent_hot&lt;/#if&gt;&quot;,
+    &quot;timestamp&quot;: ${timeStamp?c},
+    &lt;#--  data的压缩方式 0：无压缩 1：MessagePack --&gt;
+    &quot;compression&quot;: ${global.compression},
+    &quot;data&quot;: {
+        &quot;content&quot;: {
+        &lt;#--  卡片ID，由客户端指定 --&gt;
+            &quot;id&quot;: &quot;general&quot;,
+        &lt;#--  最小版本，目前默认为1 --&gt;
+            &quot;min_version&quot;: &quot;${global.min_version}&quot;,
+            &quot;content&quot; : {
+            &quot;url&quot;: &quot;${global.server_domain}/cards/api/instants?action=instants&amp;cmd=get_general_card_template&amp;card_id=${detail.id?c}&amp;template_id=${detail.template_id?c}&amp;push_source=general_card_template&amp;push_time=${timeStamp?c}&quot;
+            }
+        },
+        &lt;#--  消息目标人群肖像属性--&gt;
+        &quot;target_profile&quot;: {
+        &lt;#if detail.test_product?? &amp;&amp; detail.test_product == 1&gt;
+            &quot;device_ids&quot;: [
+            &lt;#if test_product_list??&gt;
+            &lt;#list test_product_list as mac&gt;
+                &quot;${mac}&quot;&lt;#if mac_has_next&gt;,&lt;/#if&gt;
+            &lt;/#list&gt;
+            &lt;/#if&gt;
+            ],
+        &lt;/#if&gt;
+            &quot;products&quot;: [
+                &lt;#if model_map??&gt;
+                    &lt;#list model_map.keySet() as key&gt;
+                    {
+                    &lt;#--  产品ID --&gt;
+                    &quot;id&quot;: &quot;${key?c}&quot;,
+                    &lt;#--  该产品下的目标机型，可以有多个。如果不指定，--&gt;
+                    &lt;#--  那么默认会向该产品下的所有机型推送该卡片。--&gt;
+                    &quot;models&quot;: [
+                        &lt;#if model_map??&gt;
+                            &lt;#list model_map.get(key) as item&gt;
+                                &lt;#if item!= '' &amp;&amp; item!='0'&gt;
+                                &quot;${item}&quot;&lt;#if item_has_next&gt;,&lt;/#if&gt;
+                                &lt;/#if&gt;
+                            &lt;/#list&gt;
+                        &lt;/#if&gt;
+                    ]
+                    }
+                        &lt;#if key_has_next&gt;,&lt;/#if&gt;
+                    &lt;/#list&gt;
+                &lt;/#if&gt;
+            ],
+            &lt;#if tv_list??&gt;
+            &quot;tv_ids&quot;:[
+                &lt;#list tv_list as tv&gt;
+                &quot;${tv}&quot;&lt;#if tv_has_next&gt;,&lt;/#if&gt;
+                &lt;/#list&gt;
+            ],
+            &lt;/#if&gt;
+            &lt;#if area_list??&gt;
+            &quot;areas&quot;:[
+                &lt;#list area_list as area&gt;
+                &quot;${area.area_id?c}&quot;&lt;#if area_has_next&gt;,&lt;/#if&gt;
+                &lt;/#list&gt;
+            ],
+            &lt;/#if&gt;
+            &lt;#if limit_map??&gt;
+            &quot;push_count_limit&quot;: {
+                &lt;#list limit_map.keySet() as key&gt;
+                &quot;${key?c}&quot;: &quot;${limit_map.get(key)?c}&quot;&lt;#if key_has_next&gt;,&lt;/#if&gt;
+                &lt;/#list&gt;
+            },
+            &lt;/#if&gt;
+            &quot;template_id&quot;:&quot;${detail.template_id?c}&quot;,
+            &quot;push_hot_column_limit&quot; : &lt;#if detail.template_id==2||detail.template_id==3||detail.template_id==6||detail.template_id==8||detail.template_id==9||detail.template_id==10&gt;&quot;${detail.quantity?c}&quot;&lt;#else&gt;&quot;0&quot;&lt;/#if&gt;,
+            &quot;push_global_interval_seconds&quot; : {
+              &lt;#list interval_limit_map.keySet() as key&gt;
+                &quot;${key?c}&quot;: &quot;${interval_limit_map.get(key)?c}&quot;&lt;#if key_has_next&gt;,&lt;/#if&gt;
+                &lt;/#list&gt;
+            },
+            &lt;#if detail.template_id!=1&amp;&amp;detail.template_id!=5&gt;
+                &lt;#if detail.push_over_time??&gt;
+                    &lt;#if detail.push_over_time!=0&gt;&quot;stay_channel_time&quot; : &quot;${detail.push_over_time?c}&quot;,&lt;/#if&gt;
+                &lt;/#if&gt;
+            &lt;/#if&gt;
+            &lt;#if detail.template_id==7&gt;
+              &lt;#if detail.push_interval_time!=0&gt;&quot;push_card_interval_time&quot; : &quot;${detail.push_interval_time?c}&quot;,&lt;/#if&gt;
+            &lt;/#if&gt;
+            &quot;enforcement&quot;:&quot;false&quot;
+        }
+    }
+}
+</code></pre>
+
+<ul>
+<li>模块化卡片消息格式 <a href="#top">返回顶部</a></li>
+</ul>
+<p><span id="component"></p>
+<pre><code>&lt;#import &quot;common.ftl&quot; as global/&gt;
+{
+    &quot;id&quot;: &quot;${card.id?c}&quot;,
+    &quot;type&quot;: ${msg_type},
+    &quot;source&quot;: &quot;backend_cards_components&quot;,
+    &quot;subType&quot;: 1,
+    &quot;description&quot;: &quot;${global.now_time } push components card&quot;,
+    &quot;timestamp&quot;: ${timeStamp?c},
+    &lt;#--  data的压缩方式 0：无压缩 1：MessagePack --&gt;   
+    &quot;compression&quot;: ${global.compression},
+    &quot;data&quot;: {
+        &quot;content&quot;: {
+            &lt;#--  卡片ID，由客户端指定 --&gt;   
+            &quot;id&quot;: &quot;${apk_id}&quot;,
+            &lt;#--  最小版本，目前默认为1 --&gt;   
+            &quot;min_version&quot;: &quot;${global.min_version}&quot;,
+            &quot;content&quot; : {
+                &quot;url&quot;: &quot;${global.server_domain}${api_url}&amp;msg_type=1&amp;push_time=${timeStamp?c}&amp;combination_id=${card.id?c}&amp;combination_time=${timeStamp?c}&quot;
+            }
+        },
+        &lt;#--  消息目标人群肖像属性--&gt;   
+        &quot;target_profile&quot;: {
+            &lt;#include &quot;product.ftl&quot;&gt; 
+
+            &lt;#if card.tv_id??&gt;
+                &quot;tv_id&quot;: &quot;${card.tv_id?c}&quot;,
+              &quot;column_id&quot;: &quot;${card.column_id?c}&quot;,
+            &lt;#else&gt;
+                    &lt;#if tv_list??&gt;
+                    &quot;tv_ids&quot;:[
+                       &lt;#list tv_list as tv&gt;
+                           &quot;${tv.tv_id?c}&quot;&lt;#if tv_has_next&gt;,&lt;/#if&gt;
+                           &lt;/#list&gt;
+                    ],
+                    &lt;/#if&gt;
+            &lt;/#if&gt;
+
+            &lt;#if area_list??&gt;
+                &quot;areas&quot;:[
+                     &lt;#list area_list as area&gt;
+                     &quot;${area.area_id?c}&quot;&lt;#if area_has_next&gt;,&lt;/#if&gt;
+                     &lt;/#list&gt;
+                ],
+            &lt;/#if&gt;
+
+            &lt;#if user_ids??&gt;
+                &quot;user_ids&quot;:[
+                 &lt;#list user_ids as user_id&gt;
+                     &quot;${user_id?c}&quot;&lt;#if user_id_has_next&gt;,&lt;/#if&gt;
+                  &lt;/#list&gt;
+                ],
+           &lt;/#if&gt;
+
+           &lt;#if user_groups_map??&gt;
+                &lt;#list user_groups_map  as key&gt;
+                  &quot;user_groups&quot;:[
+                      &quot;${key.group_id?c}:${key.group_type?c}&quot;
+                  &lt;#if key_has_next&gt;,&lt;/#if&gt;
+                  ]
+              &lt;/#list&gt;
+            &lt;/#if&gt;
+
+          &lt;#if cardId??&gt;
+          &quot;card_id&quot;:&quot;${cardId?c}&quot;,
+          &lt;/#if&gt;
+
+            &lt;#if card.triggerForce??&gt;
+                &lt;#if card.triggerForce == 0&gt;
+                    &quot;enforcement&quot;:&quot;false&quot;
+                &lt;/#if&gt;
+                &lt;#if card.triggerForce == 1&gt;
+                    &quot;enforcement&quot;:&quot;true&quot;
+                &lt;/#if&gt;
+            &lt;/#if&gt;
+        }
+    }
+}
+</code></pre>
+
+<ul>
+<li>卡片类型值对应表 <a href="#top">返回顶部</a>
+<span id="typeids"></li>
+</ul>
+<table>
+<thead>
+<tr>
+<th align="center">类型名称</th>
+<th>子类型ID</th>
+<th>消息类型ID</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="center">滚球下注</td>
+<td>1</td>
+<td>2</td>
+</tr>
+<tr>
+<td align="center">滚字卡片</td>
+<td>2</td>
+<td>9</td>
+</tr>
+<tr>
+<td align="center">通用卡片</td>
+<td>3</td>
+<td>8</td>
+</tr>
+<tr>
+<td align="center">卡片列表</td>
+<td>4</td>
+<td>无</td>
+</tr>
+<tr>
+<td align="center">节目信息</td>
+<td>5</td>
+<td>12</td>
+</tr>
+<tr>
+<td align="center">预约卡片</td>
+<td>6</td>
+<td>10</td>
+</tr>
+<tr>
+<td align="center">即将播放</td>
+<td>7</td>
+<td>无</td>
+</tr>
+<tr>
+<td align="center">设置卡片</td>
+<td>8</td>
+<td>无</td>
+</tr>
+<tr>
+<td align="center">个人中心</td>
+<td>9</td>
+<td>无</td>
+</tr>
+<tr>
+<td align="center">礼品商城</td>
+<td>10</td>
+<td>13</td>
+</tr>
+<tr>
+<td align="center">弹幕</td>
+<td>11</td>
+<td>无</td>
+</tr>
+<tr>
+<td align="center">体彩</td>
+<td>12</td>
+<td>无</td>
+</tr>
+<tr>
+<td align="center">投票卡片</td>
+<td>13</td>
+<td>16</td>
+</tr>
+<tr>
+<td align="center">抽奖</td>
+<td>14</td>
+<td>无</td>
+</tr>
+<tr>
+<td align="center">竞猜答题</td>
+<td>15</td>
+<td>18</td>
+</tr>
+<tr>
+<td align="center">抢购</td>
+<td>16</td>
+<td>无</td>
+</tr>
+<tr>
+<td align="center">红包</td>
+<td>22</td>
+<td>无</td>
+</tr>
+<tr>
+<td align="center">活动</td>
+<td>23</td>
+<td>无</td>
+</tr>
+<tr>
+<td align="center">视频推荐</td>
+<td>24</td>
+<td>24</td>
+</tr>
+<tr>
+<td align="center">卡片互联</td>
+<td>25</td>
+<td>无</td>
+</tr>
+<tr>
+<td align="center">在线播放</td>
+<td>101</td>
+<td>无</td>
+</tr>
+<tr>
+<td align="center">节目导视</td>
+<td>500</td>
+<td>25</td>
+</tr>
+<tr>
+<td align="center">游戏人生</td>
+<td>501</td>
+<td>26</td>
+</tr>
+<tr>
+<td align="center">主动推荐</td>
+<td>502</td>
+<td>无</td>
+</tr>
+<tr>
+<td align="center">广告卡片</td>
+<td>503</td>
+<td>27</td>
+</tr>
+<tr>
+<td align="center">模块化卡片</td>
+<td>504</td>
+<td>28</td>
+</tr>
+</tbody>
+</table></div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+            <p>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script>var base_url = '../..';</script>
+        <script src="../../js/base.js"></script>
+        <script src="../../search/require.js"></script>
+        <script src="../../search/search.js"></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="Search Modal" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title" id="exampleModalLabel">Search</h4>
+            </div>
+            <div class="modal-body">
+                <p>
+                    From here you can search these documents. Enter
+                    your search terms below.
+                </p>
+                <form role="form">
+                    <div class="form-group">
+                        <input type="text" class="form-control" placeholder="Search..." id="mkdocs-search-query">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="Keyboard Shortcuts Modal" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title" id="exampleModalLabel">Keyboard Shortcuts</h4>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td><kbd>&larr;</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td><kbd>&rarr;</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+
+    </body>
+</html>
